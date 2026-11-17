@@ -1,0 +1,24 @@
+import { NextResponse } from "next/server";
+import pool from "@/lib/db";
+
+export async function GET() {
+  try {
+    const [rows] = await pool.query("SELECT * FROM pedidos ORDER BY id DESC");
+    return NextResponse.json(rows);
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export async function POST(request) {
+  try {
+    const { usuario_id, total, estado } = await request.json();
+    const [result] = await pool.query(
+      "INSERT INTO pedidos (usuario_id, total, estado) VALUES (?, ?, ?)",
+      [Number(usuario_id), Number(total), estado || "Pendiente"]
+    );
+    return NextResponse.json({ id: result.insertId, message: "Pedido creado" }, { status: 201 });
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
